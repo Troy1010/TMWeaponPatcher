@@ -31,17 +31,22 @@ public class Program
                 if (oldWeapon.Data == null || oldWeapon.EditorID == null)
                     continue;
 
-                var newWeapon = oldWeapon.DeepCopy(); // copy weap record to temp
-
+                var newWeapon = oldWeapon.DeepCopy();
+                
                 if (newWeapon.Data?.Speed == null)
                     continue;
-                var newSpeed = newWeapon.Data.Speed * Settings.SpeedMultiplier;
-                newWeapon.Data.Speed = newSpeed;
 
-                state.PatchMod.Weapons.Set(newWeapon); // set weap record to temp
+                newWeapon.Data.Speed *= newWeapon.Data.Type switch
+                {
+                    Weapon.WeaponType.Staff => Settings.StaffSpeedMultiplier,
+                    Weapon.WeaponType.Bow => Settings.BowSpeedMultiplier,
+                    _ => Settings.MeleeSpeedMultiplier
+                };
+
+                state.PatchMod.Weapons.Set(newWeapon);
                 Console.WriteLine($"Successfully modified weapon: {oldWeapon.EditorID}");
                 ++count;
-                Console.WriteLine($"\tOldSpeed: {oldWeapon.Data.Speed} NewSpeed: {newWeapon.Data.Speed}\n");
+                Console.WriteLine($"\tOldSpeed:{oldWeapon.Data.Speed} NewSpeed:{newWeapon.Data.Speed} Type:{oldWeapon.Data.Type}\n");
             }
             catch (Exception ex)
             {
